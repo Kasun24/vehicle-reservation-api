@@ -8,9 +8,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Path("/auth")
 public class AuthController {
     private final UserDAO userDAO = new UserDAO();
@@ -19,21 +16,23 @@ public class AuthController {
     @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response login(User loginUser) {
-        if (!userDAO.validateUser(loginUser.getUsername(), loginUser.getPassword())) {
+    public Response login(User user) {
+        UserDAO userDAO = new UserDAO();
+
+        if (!userDAO.validateUser(user.getUsername(), user.getPassword())) {
             return Response.status(Response.Status.UNAUTHORIZED)
                     .entity("{\"error\": \"Invalid username or password\"}")
                     .build();
         }
 
-        // Generate JWT Token
-        String token = JWTUtil.generateToken(loginUser.getUsername(), "USER");
+        // Get role from the database
+        String role = userDAO.getUserRole(user.getUsername());
 
-        Map<String, String> response = new HashMap<>();
-        response.put("token", token);
-        response.put("role", "USER");
+        // Generate JWT token
+        String token = JWTUtil.generateToken(user.getUsername(), role);
 
-        return Response.ok(response).build();
+        return Response.ok("{\"token\": \"" + token + "\", \"role\": \"" + role + "\"}").build();
     }
+
 
 }
