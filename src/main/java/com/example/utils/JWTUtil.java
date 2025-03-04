@@ -21,4 +21,7 @@ public class JWTUtil {
                 .signWith(SECRET_KEY) // No need to specify algorithm when using a Key
                 .compact();
     }
+    public static Key getSecretKey() {
+        return SECRET_KEY;
+    }
 }
