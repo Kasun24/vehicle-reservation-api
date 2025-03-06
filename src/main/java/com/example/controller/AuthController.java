@@ -34,5 +34,32 @@ public class AuthController {
         return Response.ok("{\"token\": \"" + token + "\", \"role\": \"" + role + "\"}").build();
     }
 
+    @POST
+    @Path("/register")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response register(User user) {
+        UserDAO userDAO = new UserDAO();
 
+        // Check if username already exists
+        if (userDAO.getUserByUsername(user.getUsername()) != null) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("{\"error\": \"Username already taken\"}")
+                    .build();
+        }
+
+        // Set default role to "USER" if none provided
+        if (user.getRole() == null || user.getRole().isEmpty()) {
+            user.setRole("USER");
+        }
+
+        if (userDAO.registerUser(user)) {
+            return Response.status(Response.Status.CREATED)
+                    .entity("{\"message\": \"User registered successfully\"}")
+                    .build();
+        }
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("{\"error\": \"Failed to register user\"}")
+                .build();
+    }
 }
