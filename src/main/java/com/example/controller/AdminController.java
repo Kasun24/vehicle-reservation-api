@@ -17,12 +17,20 @@ public class AdminController {
     @Path("/update-role")
     @AdminRequired
     public Response updateUserRole(@QueryParam("username") String username, @QueryParam("role") String role) {
-        if (userDAO.updateUserRole(username, role)) {
-            return Response.ok("{\"message\": \"User role updated successfully\"}").build();
+        try {
+            boolean updated = userDAO.updateUserRole(username, role);
+            if (updated) {
+                return Response.ok("{\"message\": \"User role updated successfully\"}").build();
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"User not found or role update failed\"}")
+                        .build();
+            }
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Database error: " + e.getMessage() + "\"}")
+                    .build();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity("{\"error\": \"Failed to update user role\"}")
-                .build();
     }
 
     // 🔹 Delete User (Admin Only)
@@ -30,11 +38,19 @@ public class AdminController {
     @Path("/delete")
     @AdminRequired
     public Response deleteUser(@QueryParam("username") String username) {
-        if (userDAO.deleteUser(username)) {
-            return Response.ok("{\"message\": \"User deleted successfully\"}").build();
+        try {
+            boolean deleted = userDAO.deleteUser(username);
+            if (deleted) {
+                return Response.ok("{\"message\": \"User deleted successfully\"}").build();
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"User not found or could not be deleted\"}")
+                        .build();
+            }
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Database error: " + e.getMessage() + "\"}")
+                    .build();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity("{\"error\": \"Failed to delete user\"}")
-                .build();
     }
 }

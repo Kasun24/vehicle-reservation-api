@@ -22,9 +22,8 @@ public class CustomerDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     // 🔹 Get all customers (For Admin)
@@ -48,7 +47,7 @@ public class CustomerDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return customers;
     }
@@ -73,7 +72,7 @@ public class CustomerDAO {
                 );
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return null;
     }
@@ -92,9 +91,8 @@ public class CustomerDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     // 🔹 Delete customer (Admin Only)
@@ -106,8 +104,7 @@ public class CustomerDAO {
             stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 }

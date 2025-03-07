@@ -42,7 +42,7 @@ public class ReportDAO {
                 reportList.add(row);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return reportList;
     }
@@ -81,7 +81,7 @@ public class ReportDAO {
                 reportList.add(row);
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return reportList;
     }

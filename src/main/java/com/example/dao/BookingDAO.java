@@ -24,9 +24,8 @@ public class BookingDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     // 🔹 Get all bookings (Admin)
@@ -52,7 +51,7 @@ public class BookingDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return bookings;
     }
@@ -82,7 +81,7 @@ public class BookingDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return bookings;
     }
@@ -96,10 +95,10 @@ public class BookingDAO {
             stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
+
     // 🔹 Get a booking by its ID
     public Booking getBookingById(int id) {
         String sql = "SELECT * FROM bookings WHERE id = ?";
@@ -122,7 +121,7 @@ public class BookingDAO {
                 );
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return null;
     }

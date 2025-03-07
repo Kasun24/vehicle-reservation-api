@@ -6,6 +6,7 @@ import com.example.utils.AdminRequired;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.List;
 
 @Path("/vehicles")
@@ -17,20 +18,32 @@ public class VehicleController {
     // 🔹 Get All Vehicles (PUBLIC)
     @GET
     public Response getAllVehicles() {
-        List<Vehicle> vehicles = vehicleDAO.getAllVehicles();
-        return Response.ok(vehicles).build();
+        try {
+            List<Vehicle> vehicles = vehicleDAO.getAllVehicles();
+            return Response.ok(vehicles).build();
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     // 🔹 Get Vehicle by ID (PUBLIC)
     @GET
     @Path("/{id}")
     public Response getVehicleById(@PathParam("id") int id) {
-        Vehicle vehicle = vehicleDAO.getVehicleById(id);
-        if (vehicle != null) {
-            return Response.ok(vehicle).build();
-        } else {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("{\"error\": \"Vehicle not found\"}")
+        try {
+            Vehicle vehicle = vehicleDAO.getVehicleById(id);
+            if (vehicle != null) {
+                return Response.ok(vehicle).build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Vehicle not found\"}")
+                        .build();
+            }
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
                     .build();
         }
     }
@@ -39,14 +52,20 @@ public class VehicleController {
     @POST
     @AdminRequired
     public Response addVehicle(Vehicle vehicle) {
-        if (vehicleDAO.addVehicle(vehicle)) {
-            return Response.status(Response.Status.CREATED)
-                    .entity("{\"message\": \"Vehicle added successfully\"}")
+        try {
+            if (vehicleDAO.addVehicle(vehicle)) {
+                return Response.status(Response.Status.CREATED)
+                        .entity("{\"message\": \"Vehicle added successfully\"}")
+                        .build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Failed to add vehicle\"}")
+                    .build();
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
                     .build();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity("{\"error\": \"Failed to add vehicle\"}")
-                .build();
     }
 
     // 🔹 Update Vehicle (ADMIN ONLY)
@@ -54,13 +73,19 @@ public class VehicleController {
     @Path("/{id}")
     @AdminRequired
     public Response updateVehicle(@PathParam("id") int id, Vehicle vehicle) {
-        vehicle.setId(id);
-        if (vehicleDAO.updateVehicle(vehicle)) {
-            return Response.ok("{\"message\": \"Vehicle updated successfully\"}").build();
+        try {
+            vehicle.setId(id);
+            if (vehicleDAO.updateVehicle(vehicle)) {
+                return Response.ok("{\"message\": \"Vehicle updated successfully\"}").build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Failed to update vehicle\"}")
+                    .build();
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
+                    .build();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity("{\"error\": \"Failed to update vehicle\"}")
-                .build();
     }
 
     // 🔹 Delete Vehicle (ADMIN ONLY)
@@ -68,11 +93,17 @@ public class VehicleController {
     @Path("/{id}")
     @AdminRequired
     public Response deleteVehicle(@PathParam("id") int id) {
-        if (vehicleDAO.deleteVehicle(id)) {
-            return Response.ok("{\"message\": \"Vehicle deleted successfully\"}").build();
+        try {
+            if (vehicleDAO.deleteVehicle(id)) {
+                return Response.ok("{\"message\": \"Vehicle deleted successfully\"}").build();
+            }
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Failed to delete vehicle\"}")
+                    .build();
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
+                    .build();
         }
-        return Response.status(Response.Status.BAD_REQUEST)
-                .entity("{\"error\": \"Failed to delete vehicle\"}")
-                .build();
     }
 }
