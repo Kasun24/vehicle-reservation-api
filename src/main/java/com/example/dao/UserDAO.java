@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import org.mindrot.jbcrypt.BCrypt;
 
 public class UserDAO {
@@ -25,9 +26,8 @@ public class UserDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     // 🔹 Update User Role
@@ -40,9 +40,8 @@ public class UserDAO {
             stmt.setString(2, username);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     // 🔹 Delete User
@@ -54,9 +53,8 @@ public class UserDAO {
             stmt.setString(1, username);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     public User getUserByUsername(String username) {
@@ -76,7 +74,7 @@ public class UserDAO {
                 );
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return null;
     }
@@ -94,10 +92,11 @@ public class UserDAO {
                 return BCrypt.checkpw(password, storedHash); // Compare hashed password
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return false;
     }
+
     public String getUserRole(String username) {
         String sql = "SELECT role FROM users WHERE username = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -110,11 +109,10 @@ public class UserDAO {
                 return rs.getString("role");
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return null;
     }
-
 
 
 }

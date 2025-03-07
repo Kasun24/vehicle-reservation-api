@@ -20,9 +20,8 @@ public class DriverDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     // 🔹 Get all drivers
@@ -45,7 +44,7 @@ public class DriverDAO {
             }
 
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return drivers;
     }
@@ -69,7 +68,7 @@ public class DriverDAO {
                 );
             }
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return null;
     }
@@ -88,9 +87,8 @@ public class DriverDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 
     // 🔹 Delete a driver (Admin Only)
@@ -102,8 +100,7 @@ public class DriverDAO {
             stmt.setInt(1, id);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
-        return false;
     }
 }
