@@ -21,9 +21,14 @@ public class ReportController {
             @QueryParam("start_date") String startDate,
             @QueryParam("end_date") String endDate,
             @QueryParam("status") String status) {
-
-        List<Map<String, Object>> report = reportDAO.getBookingReport(startDate, endDate, status);
-        return Response.ok(report).build();
+        try {
+            List<Map<String, Object>> report = reportDAO.getBookingReport(startDate, endDate, status);
+            return Response.ok(report).build();
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 
     // 🔹 Generate Payment Report
@@ -33,8 +38,13 @@ public class ReportController {
             @QueryParam("start_date") String startDate,
             @QueryParam("end_date") String endDate,
             @QueryParam("status") String status) {
-
-        List<Map<String, Object>> report = reportDAO.getPaymentReport(startDate, endDate, status);
-        return Response.ok(report).build();
+        try {
+            List<Map<String, Object>> report = reportDAO.getPaymentReport(startDate, endDate, status);
+            return Response.ok(report).build();
+        } catch (RuntimeException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
+                    .build();
+        }
     }
 }
