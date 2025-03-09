@@ -33,6 +33,22 @@ public class BookingController {
                     .build();
         }
     }
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateBooking(@PathParam("id") int id, Booking booking) {
+        booking.setId(id);
+        boolean updated = bookingDAO.updateBooking(booking);
+
+        if (updated) {
+            return Response.ok("{\"message\": \"Booking updated successfully\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Failed to update booking\"}")
+                    .build();
+        }
+    }
 
     // 🔹 Get all bookings (Admin Only)
     @GET
@@ -62,25 +78,6 @@ public class BookingController {
         }
     }
 
-    // 🔹 Cancel booking (Admin Only)
-    @DELETE
-    @Path("/{id}")
-    @AdminRequired
-    public Response cancelBooking(@PathParam("id") int id) {
-        try {
-            if (bookingDAO.cancelBooking(id)) {
-                return Response.ok("{\"message\": \"Booking cancelled successfully\"}").build();
-            }
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"Failed to cancel booking\"}")
-                    .build();
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
-                    .build();
-        }
-    }
-
     // 🔹 Get booking by ID
     @GET
     @Path("/id/{id}")
@@ -100,4 +97,15 @@ public class BookingController {
                     .build();
         }
     }
+    @DELETE
+    @Path("/{id}")
+    public Response deleteBooking(@PathParam("id") int id) {
+        boolean deleted = bookingDAO.deleteBooking(id);
+        if (deleted) {
+            return Response.ok().entity("Booking deleted successfully").build();
+        } else {
+            return Response.status(Response.Status.NOT_FOUND).entity("Booking not found").build();
+        }
+    }
+
 }
