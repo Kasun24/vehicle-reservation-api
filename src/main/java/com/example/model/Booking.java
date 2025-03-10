@@ -11,10 +11,11 @@ public class Booking {
     private Date startDate;
     private Date endDate;
     private String status;
+    private String bookingNumber;
 
     public Booking() {}
 
-    public Booking(int id, int customerId, int vehicleId, int driverId, String destination, Date startDate, Date endDate, String status) {
+    public Booking(int id, int customerId, int vehicleId, int driverId, String destination, Date startDate, Date endDate, String status, String bookingNumber) {
         this.id = id;
         this.customerId = customerId;
         this.vehicleId = vehicleId;
@@ -23,6 +24,7 @@ public class Booking {
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
+        this.bookingNumber = bookingNumber;
     }
 
     public int getId() { return id; }
@@ -48,4 +50,7 @@ public class Booking {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getBookingNumber() { return bookingNumber; }
+    public void setBookingNumber(String bookingNumber) { this.bookingNumber = bookingNumber; }
 }

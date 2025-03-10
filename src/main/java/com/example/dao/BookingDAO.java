@@ -11,7 +11,8 @@ public class BookingDAO {
 
     // 🔹 Create a new booking (User)
     public boolean createBooking(Booking booking) {
-        String sql = "INSERT INTO bookings (customer_id, vehicle_id, driver_id, destination, start_date, end_date, status) VALUES (?, ?, ?, ?, ?, ?, 'PENDING')";
+        String booking_number = generateBookingNumber();
+        String sql = "INSERT INTO bookings (customer_id, vehicle_id, driver_id, destination, start_date, end_date, status, booking_number) VALUES (?, ?, ?, ?, ?, ?, 'PENDING',?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -32,7 +33,7 @@ public class BookingDAO {
             } else {
                 stmt.setNull(6, java.sql.Types.DATE);
             }
-
+            stmt.setString(7, booking_number);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Database error: " + e.getMessage());
@@ -90,7 +91,8 @@ public class BookingDAO {
                         rs.getString("destination"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("booking_number")
                 ));
             }
 
@@ -120,7 +122,8 @@ public class BookingDAO {
                         rs.getString("destination"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("booking_number")
                 ));
             }
 
@@ -148,7 +151,8 @@ public class BookingDAO {
                         rs.getString("destination"),
                         rs.getDate("start_date"),
                         rs.getDate("end_date"),
-                        rs.getString("status")
+                        rs.getString("status"),
+                        rs.getString("booking_number")
                 );
             }
         } catch (SQLException e) {
@@ -166,6 +170,26 @@ public class BookingDAO {
             int affectedRows = stmt.executeUpdate();
 
             return affectedRows > 0; // Returns true if deletion was successful
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error: " + e.getMessage());
+        }
+    }
+    private String generateBookingNumber() {
+        String prefix = "BKG-" + new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+        String sql = "SELECT COUNT(*) FROM bookings WHERE booking_number LIKE ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, prefix + "%"); // Search for existing bookings on the same date
+            ResultSet rs = stmt.executeQuery();
+            int count = 1;
+
+            if (rs.next()) {
+                count = rs.getInt(1) + 1; // Increment count for unique sequence
+            }
+
+            return String.format("%s-%04d", prefix, count); // Format: BKG-YYYYMMDD-XXXX
         } catch (SQLException e) {
             throw new RuntimeException("Database error: " + e.getMessage());
         }
