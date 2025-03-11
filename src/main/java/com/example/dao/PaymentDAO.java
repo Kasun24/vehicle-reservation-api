@@ -11,7 +11,8 @@ public class PaymentDAO {
 
     // 🔹 Add a new payment
     public boolean addPayment(Payment payment) {
-        String sql = "INSERT INTO payments (booking_id, amount, tax, discount, total_amount, status) VALUES (?, ?, ?, ?, ?, 'PENDING')";
+        String sql = "INSERT INTO payments (booking_id, amount, tax, discount, total_amount, status, payment_date) " +
+                "VALUES (?, ?, ?, ?, ?, 'PENDING', NOW())";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -23,7 +24,7 @@ public class PaymentDAO {
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Database error: " + e.getMessage());
+            throw new RuntimeException("Database error while adding payment: " + e.getMessage());
         }
     }
 
@@ -48,9 +49,8 @@ public class PaymentDAO {
                         rs.getTimestamp("payment_date")
                 ));
             }
-
         } catch (SQLException e) {
-            throw new RuntimeException("Database error: " + e.getMessage());
+            throw new RuntimeException("Database error while fetching payments: " + e.getMessage());
         }
         return payments;
     }
@@ -77,23 +77,59 @@ public class PaymentDAO {
                 );
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error: " + e.getMessage());
+            throw new RuntimeException("Database error while fetching payment by booking ID: " + e.getMessage());
         }
         return null;
     }
 
-    // 🔹 Update payment status (Mark as PAID)
-    public boolean updatePaymentStatus(int bookingId, String status) {
-        String sql = "UPDATE payments SET status = ? WHERE booking_id = ?";
+    // 🔹 Update all payment details
+    public boolean updatePayment(Payment payment) {
+        String sql = "UPDATE payments SET amount = ?, tax = ?, discount = ?, total_amount = ? WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setBigDecimal(1, payment.getAmount());
+            stmt.setBigDecimal(2, payment.getTax());
+            stmt.setBigDecimal(3, payment.getDiscount());
+            stmt.setBigDecimal(4, payment.getTotalAmount());
+            stmt.setInt(5, payment.getId());
+
+            int affectedRows = stmt.executeUpdate();
+            return affectedRows > 0;  // Ensures at least one row is updated
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error: " + e.getMessage());
+        }
+    }
+
+    // 🔹 Update payment status (Mark as PAID / CANCELLED) and set payment_date
+    public boolean updatePaymentStatus(int id, String status) {
+        String sql = "UPDATE payments SET status = ?, payment_date = NOW() WHERE id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, status);
-            stmt.setInt(2, bookingId);
+            stmt.setInt(2, id);
 
             return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error while updating payment status: " + e.getMessage());
+        }
+    }
+    public boolean deletePayment(int paymentId) {
+        String sql = "DELETE FROM payments WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, paymentId);
+            int affectedRows = stmt.executeUpdate();
+
+            return affectedRows > 0; // ✅ Returns true if deleted successfully
         } catch (SQLException e) {
             throw new RuntimeException("Database error: " + e.getMessage());
         }
     }
 }
+
+
