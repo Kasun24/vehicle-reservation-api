@@ -10,10 +10,10 @@ public class ReportDAO {
     // 🔹 Generate Booking Report
     public List<Map<String, Object>> getBookingReport(String startDate, String endDate, String status) {
         List<Map<String, Object>> reportList = new ArrayList<>();
-        String sql = "SELECT b.id, c.name AS customer_name, v.model AS vehicle, " +
+        String sql = "SELECT b.id, c.name AS user_name, v.model AS vehicle, " +
                 "b.destination, b.start_date, b.end_date, b.status " +
                 "FROM bookings b " +
-                "JOIN customers c ON b.customer_id = c.id " +
+                "JOIN users c ON b.user_id = c.id " +
                 "JOIN vehicles v ON b.vehicle_id = v.id " +
                 "WHERE (? IS NULL OR b.start_date >= ?) " +
                 "AND (? IS NULL OR b.end_date <= ?) " +
@@ -33,7 +33,7 @@ public class ReportDAO {
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();
                 row.put("booking_id", rs.getInt("id"));
-                row.put("customer_name", rs.getString("customer_name"));
+                row.put("user_name", rs.getString("user_name"));
                 row.put("vehicle", rs.getString("vehicle"));
                 row.put("destination", rs.getString("destination"));
                 row.put("start_date", rs.getString("start_date"));

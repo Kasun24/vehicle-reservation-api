@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Booking {
     private int id;
-    private int customerId;
+    private int userId;
     private int vehicleId;
     private int driverId;
     private String destination;
@@ -15,9 +15,9 @@ public class Booking {
 
     public Booking() {}
 
-    public Booking(int id, int customerId, int vehicleId, int driverId, String destination, Date startDate, Date endDate, String status, String bookingNumber) {
+    public Booking(int id, int userId, int vehicleId, int driverId, String destination, Date startDate, Date endDate, String status, String bookingNumber) {
         this.id = id;
-        this.customerId = customerId;
+        this.userId = userId;
         this.vehicleId = vehicleId;
         this.driverId = driverId;
         this.destination = destination;
@@ -30,8 +30,8 @@ public class Booking {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public int getCustomerId() { return customerId; }
-    public void setCustomerId(int customerId) { this.customerId = customerId; }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public int getVehicleId() { return vehicleId; }
     public void setVehicleId(int vehicleId) { this.vehicleId = vehicleId; }

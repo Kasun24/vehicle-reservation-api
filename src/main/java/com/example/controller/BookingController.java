@@ -33,6 +33,8 @@ public class BookingController {
                     .build();
         }
     }
+
+    // 🔹 Update booking
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -64,12 +66,13 @@ public class BookingController {
         }
     }
 
-    // 🔹 Get bookings for a specific customer (User)
+    // 🔹 Get bookings for a specific user (Regular User)
     @GET
-    @Path("/{customerId}")
-    public Response getCustomerBookings(@PathParam("customerId") int customerId) {
+    @Path("/user/{username}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserBookings(@PathParam("username") String username) {
         try {
-            List<Booking> bookings = bookingDAO.getCustomerBookings(customerId);
+            List<Booking> bookings = bookingDAO.getBookingsByUsername(username);
             return Response.ok(bookings).build();
         } catch (RuntimeException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
@@ -97,6 +100,8 @@ public class BookingController {
                     .build();
         }
     }
+
+    // 🔹 Delete Booking
     @DELETE
     @Path("/{id}")
     public Response deleteBooking(@PathParam("id") int id) {
