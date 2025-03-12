@@ -102,7 +102,7 @@ public class BookingDAO {
         return bookings;
     }
 
-    // 🔹 Get bookings by username (User)
+    // 🔹 Get bookings by username
     public List<Booking> getBookingsByUsername(String username) {
         List<Booking> bookings = new ArrayList<>();
         String sql = "SELECT b.* FROM bookings b JOIN users u ON b.user_id = u.id WHERE u.username = ?";
@@ -126,7 +126,6 @@ public class BookingDAO {
                         rs.getString("booking_number")
                 ));
             }
-
         } catch (SQLException e) {
             throw new RuntimeException("Database error: " + e.getMessage());
         }
@@ -172,6 +171,62 @@ public class BookingDAO {
             int affectedRows = stmt.executeUpdate();
 
             return affectedRows > 0; // Returns true if deletion was successful
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error: " + e.getMessage());
+        }
+    }
+
+    // ✅ Get user ID by username
+    public int getUserIdByUsername(String username) {
+        String sql = "SELECT id FROM users WHERE username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error: " + e.getMessage());
+        }
+        return -1; // Return invalid ID if not found
+    }
+
+    // ✅ Create booking for user
+    public boolean createUserBooking(Booking booking) {
+        String booking_number = generateBookingNumber();
+        String sql = "INSERT INTO bookings (user_id, vehicle_id, driver_id, destination, start_date, end_date, status, booking_number) " +
+                "VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?)";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, booking.getUserId());
+            stmt.setInt(2, booking.getVehicleId());
+            stmt.setInt(3, booking.getDriverId());
+
+            stmt.setString(4, booking.getDestination());
+            stmt.setDate(5, new java.sql.Date(booking.getStartDate().getTime()));
+            stmt.setDate(6, new java.sql.Date(booking.getEndDate().getTime()));
+            stmt.setString(7, booking_number);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database error: " + e.getMessage());
+        }
+    }
+
+    // ✅ Cancel booking for user
+    public boolean cancelUserBooking(int bookingId) {
+        String sql = "UPDATE bookings SET status = 'CANCELLED' WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, bookingId);
+            return stmt.executeUpdate() > 0; // ✅ Returns true if at least one row is updated
         } catch (SQLException e) {
             throw new RuntimeException("Database error: " + e.getMessage());
         }
