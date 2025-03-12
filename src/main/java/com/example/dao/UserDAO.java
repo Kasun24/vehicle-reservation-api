@@ -60,20 +60,21 @@ public class UserDAO {
     }
 
     // 🔹 Update User Profile (Users can update their own details)
-    public boolean updateUserProfile(String username, User user) {
-        String sql = "UPDATE users SET name = ?, address = ?, nic = ?, phone = ? WHERE username = ?";
+    public boolean updateUserProfile(String username, User updatedUser) {
+        String sql = "UPDATE users SET name = ?, address = ?, phone = ?, nic = ? WHERE username = ?";
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, user.getName());
-            stmt.setString(2, user.getAddress());
-            stmt.setString(3, user.getNic());
-            stmt.setString(4, user.getPhone());
+            stmt.setString(1, updatedUser.getName());
+            stmt.setString(2, updatedUser.getAddress());
+            stmt.setString(3, updatedUser.getPhone());
+            stmt.setString(4, updatedUser.getNic());
             stmt.setString(5, username);
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            throw new RuntimeException("Database error while updating user profile: " + e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
     }
 
@@ -106,7 +107,8 @@ public class UserDAO {
 
     // 🔹 Get a user by username
     public User getUserByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT id, username, name, address, phone, nic FROM users WHERE username = ?";
+
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
@@ -114,19 +116,17 @@ public class UserDAO {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                return new User(
-                        rs.getInt("id"),
-                        rs.getString("username"),
-                        rs.getString("password"),
-                        rs.getString("role"),
-                        rs.getString("name"),
-                        rs.getString("address"),
-                        rs.getString("nic"),
-                        rs.getString("phone")
-                );
+                int id = rs.getInt("id");
+                String uname = rs.getString("username");
+                String name = rs.getString("name");
+                String address = rs.getString("address");
+                String phone = rs.getString("phone"); // ✅ Ensuring correct field mapping
+                String nic = rs.getString("nic");
+
+                return new User(id, uname, null, null, name, address, nic, phone);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Database error while retrieving user: " + e.getMessage());
+            throw new RuntimeException("Database error: " + e.getMessage());
         }
         return null;
     }

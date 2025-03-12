@@ -3,11 +3,10 @@ package com.example.controller;
 import com.example.dao.UserDAO;
 import com.example.model.User;
 import com.example.utils.AdminRequired;
+import com.example.utils.JWTUtil;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.*;
+
 import java.util.Map;
 
 import java.util.List;
@@ -18,45 +17,45 @@ import java.util.List;
 public class UserController {
     private final UserDAO userDAO = new UserDAO();
 
-    // 🔹 Get User Profile (Authenticated User)
     @GET
     @Path("/profile")
-    public Response getProfile(@Context SecurityContext securityContext) {
-        try {
-            String loggedInUsername = securityContext.getUserPrincipal().getName();
-            User user = userDAO.getUserByUsername(loggedInUsername);
-            if (user != null) {
-                return Response.ok(user).build();
-            } else {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("{\"error\": \"User not found\"}")
-                        .build();
-            }
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
+    public Response getUserProfile(@Context HttpHeaders headers) {
+        String token = headers.getHeaderString("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("{\"error\": \"Missing or invalid Authorization header\"}")
                     .build();
         }
+
+        String username = JWTUtil.extractUsername(token.replace("Bearer ", ""));
+        User user = userDAO.getUserByUsername(username);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\": \"User not found\"}")
+                    .build();
+        }
+
+        return Response.ok(user).build();
     }
 
-    // 🔹 Update User Profile (Authenticated User)
     @PUT
     @Path("/profile")
-    public Response updateProfile(User user, @Context SecurityContext securityContext) {
-        try {
-            String loggedInUsername = securityContext.getUserPrincipal().getName();
-            boolean updated = userDAO.updateUserProfile(loggedInUsername, user);
+    public Response updateUserProfile(@Context HttpHeaders headers, User updatedUser) {
+        String token = headers.getHeaderString("Authorization");
+        if (token == null || !token.startsWith("Bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED)
+                    .entity("{\"error\": \"Missing or invalid Authorization header\"}")
+                    .build();
+        }
 
-            if (updated) {
-                return Response.ok("{\"message\": \"Profile updated successfully\"}").build();
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("{\"error\": \"Failed to update profile\"}")
-                        .build();
-            }
-        } catch (RuntimeException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
+        String username = JWTUtil.extractUsername(token.replace("Bearer ", ""));
+        boolean success = userDAO.updateUserProfile(username, updatedUser);
+
+        if (success) {
+            return Response.ok("{\"message\": \"Profile updated successfully\"}").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Failed to update profile\"}")
                     .build();
         }
     }
