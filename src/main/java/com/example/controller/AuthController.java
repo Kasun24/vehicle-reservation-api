@@ -10,7 +10,16 @@ import jakarta.ws.rs.core.Response;
 
 @Path("/auth")
 public class AuthController {
-    private final UserDAO userDAO = new UserDAO();
+    private UserDAO userDAO;
+    // ✅ Default Constructor (For Existing System)
+    public AuthController() {
+        this.userDAO = new UserDAO(); // Uses actual database in production
+    }
+
+    // ✅ Constructor for Testing (Allows Mocking UserDAO)
+    public AuthController(UserDAO userDAO) {
+        this.userDAO = userDAO; // Allows testing with a mock UserDAO
+    }
 
     @POST
     @Path("/login")
