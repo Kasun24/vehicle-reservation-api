@@ -100,7 +100,15 @@ public class VehicleController {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("{\"error\": \"Failed to delete vehicle\"}")
                     .build();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
+            // Check if the error message contains a foreign key constraint failure
+            if (e.getMessage().contains("foreign key constraint fails")) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Cannot delete vehicle: This vehicle is assigned to a booking. Remove the booking first.\"}")
+                        .build();
+            }
+
+            // Handle other unexpected errors
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
                     .build();

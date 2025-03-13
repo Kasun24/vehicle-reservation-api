@@ -94,13 +94,23 @@ public class DriverController {
     @AdminRequired
     public Response deleteDriver(@PathParam("id") int id) {
         try {
-            if (driverDAO.deleteDriver(id)) {
-                return Response.ok("{\"message\": \"Driver deleted successfully\"}").build();
+            boolean deleted = driverDAO.deleteDriver(id);
+            if (deleted) {
+                return Response.ok("{\"message\": \"Driver deleted successfully!\"}").build();
+            } else {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Driver not found!\"}")
+                        .build();
             }
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"Failed to delete driver\"}")
-                    .build();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
+            // Check if the exception is related to foreign key constraint
+            if (e.getMessage().contains("foreign key constraint fails")) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\": \"Cannot delete driver: The driver is assigned to a booking. Remove the booking first.\"}")
+                        .build();
+            }
+
+            // Handle any other server errors
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("{\"error\": \"Server error: " + e.getMessage() + "\"}")
                     .build();
